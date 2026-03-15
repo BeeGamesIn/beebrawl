@@ -1,6 +1,6 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Bee Brawl: Trophy Road</title>
+<title>Bee Brawl: Ultimate</title>
 <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1Xy_Y-47_7U3-04z8G2H9lP4vLg5C8A7f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style>
@@ -9,131 +9,123 @@ canvas{display:block}.overlay{position:absolute;top:0;left:0;width:100%;height:1
 .menu-card{background:#222;padding:20px;border-radius:20px;border:3px solid #fc0;width:85%;max-width:380px;display:flex;flex-direction:column;text-align:center;max-height:90vh}
 button{padding:12px;font-size:16px;background:#4CAF50;color:#fff;border:2px solid #fff;border-radius:12px;cursor:pointer;margin:4px 0;width:100%;font-weight:bold}
 button:disabled{opacity:.4}.exit-btn{background:#f44!important}
-.stats-bar{position:absolute;top:10px;left:10px;font-size:16px;color:#fc0;z-index:110;text-shadow:1px 1px #000}
-.road-btn{background:#e67e22!important;border-color:#fff!important}
+.stats-bar{position:absolute;top:10px;left:10px;font-size:14px;color:#fc0;z-index:110;text-shadow:1px 1px #000}
+.road-btn{background:#e67e22!important}
 #ui{position:absolute;top:10px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:10;display:none;text-align:center}
-.road-item{background:#333;margin:5px 0;padding:10px;border-radius:12px;display:flex;justify-content:space-between;align-items:center}
+.shop-item,.road-item{background:#333;margin-bottom:8px;padding:10px;border-radius:12px;border:1px solid #444;display:flex;justify-content:space-between;align-items:center;text-align:left}
 .game-logo{width:100px;height:100px;border-radius:20px;border:3px solid #fc0;margin-bottom:10px}
+#roadList,#shopList{overflow-y:auto;flex-grow:1;margin:10px 0;padding-right:5px}
+input{padding:10px;border-radius:10px;border:none;margin-bottom:10px;text-align:center;width:80%;align-self:center}
 </style></head><body>
 
 <div class="stats-bar">💰 <span id="coinCount">0</span> | 🏆 <span id="trophyCount">0</span></div>
 
 <div id="mainMenu" class="overlay">
     <img src="https://lh3.googleusercontent.com/d/1Xy_Y-47_7U3-04z8G2H9lP4vLg5C8A7f" class="game-logo">
-    <h1 style="color:#fc0;margin:0;">BEE BRAWL</h1>
+    <h1 style="color:#fc0;margin:0 0 10px 0;">BEE BRAWL</h1>
     <div style="width:240px">
         <button onclick="showMenu('modeMenu')">В БОЙ!</button>
         <button class="road-btn" onclick="showMenu('roadMenu')">🏆 ПУТЬ НАГРАД</button>
-        <button onclick="showMenu('hiveMenu')">🐝 УЛЕЙ</button>
-        <button style="background:#666" onclick="showMenu('settingsMenu')">⚙️</button>
+        <button onclick="showMenu('hiveMenu')">🐝 УЛЕЙ (МАГАЗИН)</button>
+        <button style="background:#666" onclick="showMenu('settingsMenu')">⚙️ НАСТРОЙКИ</button>
     </div>
 </div>
 
 <div id="roadMenu" class="overlay" style="display:none">
-    <div class="menu-card">
-        <h2 style="color:#fc0">ПУТЬ К НАГРАДАМ</h2>
-        <div id="roadList" style="overflow-y:auto; flex-grow:1; margin-bottom:10px"></div>
-        <button class="exit-btn" onclick="showMenu('mainMenu')">ЗАКРЫТЬ</button>
-    </div>
+    <div class="menu-card"><h2 style="color:#fc0">ПУТЬ НАГРАД</h2><div id="roadList"></div><button class="exit-btn" onclick="showMenu('mainMenu')">НАЗАД</button></div>
 </div>
 
-<div id="settingsMenu" class="overlay" style="display:none"><div class="menu-card"><h2>НАСТРОЙКИ</h2><input type="text" id="nickInput" style="padding:10px;border-radius:10px;text-align:center"><button onclick="updateNick()">ОК</button><button class="exit-btn" onclick="showMenu('mainMenu')">НАЗАД</button></div></div>
-<div id="hiveMenu" class="overlay" style="display:none"><div class="menu-card"><h2>УЛЕЙ</h2><div id="shopList"></div><button class="exit-btn" onclick="showMenu('mainMenu')">НАЗАД</button></div></div>
-<div id="modeMenu" class="overlay" style="display:none"><div class="menu-card"><h2>РЕЖИМЫ</h2><button onclick="startGame('gems')">💎 КРИСТАЛЛЫ</button><button onclick="startGame('arena')">⚔️ АРЕНА</button><button class="exit-btn" onclick="showMenu('mainMenu')">НАЗАД</button></div></div>
-<div id="resultScreen" class="overlay" style="display:none"><div class="menu-card"><h1 id="resTitle"></h1><p id="resReward"></p><p id="resTrophies" style="color:#3498db"></p><button onclick="showMenu('mainMenu')">В МЕНЮ</button></div></div>
+<div id="settingsMenu" class="overlay" style="display:none">
+    <div class="menu-card"><h2>НАСТРОЙКИ</h2><input type="text" id="nickInput" placeholder="Ваш ник..."><button onclick="updateNick()">ОК</button><button id="musicBtn" onclick="toggleMusic()">МУЗЫКА: ВКЛ</button><button id="optBtn" onclick="toggleOpt()">НИЗКИЙ FPS: ВЫКЛ</button><button class="exit-btn" onclick="showMenu('mainMenu')">НАЗАД</button></div>
+</div>
 
-<div id="ui"><h2 id="scoreText">0 : 0</h2></div>
+<div id="hiveMenu" class="overlay" style="display:none">
+    <div class="menu-card"><h2>УЛЕЙ</h2><div id="shopList"></div><button class="exit-btn" onclick="showMenu('mainMenu')">НАЗАД</button></div>
+</div>
+
+<div id="modeMenu" class="overlay" style="display:none">
+    <div class="menu-card"><h2>РЕЖИМЫ</h2><button onclick="startGame('gems')">💎 КРИСТАЛЛЫ</button><button onclick="startGame('arena')">⚔️ АРЕНА</button><button class="exit-btn" onclick="showMenu('mainMenu')">НАЗАД</button></div>
+</div>
+
+<div id="resultScreen" class="overlay" style="display:none">
+    <div class="menu-card"><h1 id="resTitle"></h1><p id="resReward" style="color:#fc0"></p><p id="resTrophies" style="color:#3498db"></p><button onclick="showMenu('mainMenu')">В МЕНЮ</button></div>
+</div>
+
+<div id="ui"><h2 id="modeInfo" style="margin:0;font-size:12px;color:#fc0"></h2><h2 id="scoreText" style="margin:0">0 : 0</h2></div>
 <canvas id="gameCanvas"></canvas>
 
 <script>
 const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
 canvas.width=window.innerWidth;canvas.height=window.innerHeight;
 
-// D - Данные игрока. clR - список забранных наград на пути.
-let D=JSON.parse(localStorage.getItem('bbV_Road'))||{coins:0,trophies:0,unlocked:['bee'],selected:'bee',clR:[],nick:'Player1',clS:0,clHeart:0};
+let D=JSON.parse(localStorage.getItem('bbV_Final'))||{coins:0,trophies:0,unlocked:['bee'],selected:'bee',clR:[],nick:'Player1',music:true,low:false,clHeart:0,kills:0};
+const NAMES=["Shadow","Blaze","Storm","Hunter","Ace","Viper","Rogue","Frost"];
+const C={'bee':{e:'🐝',h:160,s:2.3,r:1200,t:'sniper',n:'Пчела',p:0},'fly':{e:'🪰',h:130,s:2.8,r:1000,t:'shotgun',n:'Муха',p:400},'mosquito':{e:'🦟',h:110,s:3.5,r:800,t:'sniper',n:'Комар',p:800},'butterfly':{e:'🦋',h:200,s:2.5,r:1300,t:'sniper',n:'Бабочка',p:1500},'hopper':{e:'🦗',h:120,s:3.2,r:1500,t:'jumper',n:'Кузнечик',p:2000},'bumble':{e:'🐝',h:250,s:1.8,r:2000,t:'tank',n:'Шмель',p:2000},'spider':{e:'🕷️',h:180,s:2.4,r:1400,t:'spider',n:'Паук',p:3500}};
 
-function save(){
-    localStorage.setItem('bbV_Road',JSON.stringify(D));
-    document.getElementById('coinCount').innerText=D.coins;
-    document.getElementById('trophyCount').innerText=D.trophies;
-}
+let active=0,mode='arena',bS=0,rS=0,uH=0,bullets=[],obs=[],tB=[],tR=[],gems=[],webs=[],mTime=0,audioCtx=null,J={move:{a:0,sx:0,sy:0,cx:0,cy:0},atk:{a:0,sx:0,sy:0,cx:0,cy:0,ang:0},ult:{a:0,sx:0,sy:0,cx:0,cy:0,ang:0}};
 
-function showMenu(id){
-    document.querySelectorAll('.overlay').forEach(m=>m.style.display='none');
-    document.getElementById(id).style.display='flex';
-    if(id==='roadMenu')upRoad();
-    if(id==='hiveMenu')upS();
-}
+function save(){localStorage.setItem('bbV_Final',JSON.stringify(D));document.getElementById('coinCount').innerText=D.coins;document.getElementById('trophyCount').innerText=D.trophies;document.getElementById('nickInput').value=D.nick}
+
+function showMenu(id){document.querySelectorAll('.overlay').forEach(m=>m.style.display='none');document.getElementById(id).style.display='flex';if(id==='roadMenu')upRoad();if(id==='hiveMenu')upS();if(D.music)startAudio()}
 
 function upRoad(){
-    let h = '';
-    // Генерируем награды до 600 кубков (с шагом 50)
-    for(let t=50; t<=550; t+=50){
-        let isCl = D.clR.includes(t);
-        let canCl = D.trophies >= t && !isCl;
-        let rewardText = "";
-        
-        if(t === 500) {
-            rewardText = "❤️🐝 СКИН";
-            if(D.clHeart) isCl = true;
-        } else {
-            rewardText = (t <= 250 ? "35" : "25") + " 💰";
-        }
-
-        h += `<div class="road-item">
-            <span style="font-weight:bold; color:${D.trophies>=t?'#fc0':'#777'}">${t} 🏆</span>
-            <span>${rewardText}</span>
-            <button style="width:80px; font-size:10px; background:${isCl?'#444':(canCl?'#4CAF50':'#777')}" 
-                ${!canCl?'disabled':''} onclick="claimRoad(${t})">
-                ${isCl?'ВЗЯТО':(canCl?'ЗАБРАТЬ':'ЗАБЛОК')}
-            </button>
-        </div>`;
-    }
-    document.getElementById('roadList').innerHTML = h;
+    let h='';for(let t=50;t<=550;t+=50){
+        let isCl=D.clR.includes(t),canCl=D.trophies>=t && !isCl;
+        let rew=t===500?"❤️🐝 СКИН":(t<=250?"35 💰":"25 💰");
+        h+=`<div class="road-item"><span>${t} 🏆</span><span>${rew}</span><button style="width:70px;font-size:10px" ${!canCl?'disabled':''} onclick="claimRoad(${t})">${isCl?'ВЗЯТО':'ВЗЯТЬ'}</button></div>`;
+    }document.getElementById('roadList').innerHTML=h;
 }
+function claimRoad(t){if(t===500)D.clHeart=1;else D.coins+=(t<=250?35:25);D.clR.push(t);save();upRoad()}
 
-function claimRoad(t){
-    if(t === 500) {
-        D.clHeart = 1;
-    } else {
-        D.coins += (t <= 250 ? 35 : 25);
-    }
-    D.clR.push(t);
-    save();
-    upRoad();
+function upS(){
+    let h='';for(let k in C){
+        let i=C[k],o=D.unlocked.includes(k),s=D.selected===k;
+        h+=`<div class="shop-item"><span>${i.e} ${i.n}</span><button style="width:80px" onclick="${o?'sel(\''+k+'\')':'buy(\''+k+'\','+i.p+')'}" ${s?'disabled':''}>${s?'ВЫБРАНО':(o?'ВЫБОР':i.p)}</button></div>`;
+    }document.getElementById('shopList').innerHTML=h;
 }
+function buy(k,p){if(D.coins>=p){D.coins-=p;D.unlocked.push(k);save();upS()}}
+function sel(k){D.selected=k;save();upS()}
 
-// Изменяем отрисовку пчелы, если выбран скин "Сердечко"
-const C={'bee':{e:'🐝',h:160,s:2.3,r:1200,n:'Bee'}}; // Упрощено для примера
+function updateNick(){let n=document.getElementById('nickInput').value;if(n){D.nick=n;save()}}
+function toggleMusic(){D.music=!D.music;if(!D.music&&audioCtx)audioCtx.close();save()}
+function toggleOpt(){D.low=!D.low;save()}
 
-function endG(w){
-    active=0;
-    let cW = w ? 150 : 40;
-    let tW = w ? Math.floor(Math.random()*3)+6 : 0;
-    D.coins += cW; D.trophies += tW;
-    save();
-    document.getElementById('resTitle').innerText = w ? "ПОБЕДА!" : "ПОРАЖЕНИЕ";
-    document.getElementById('resReward').innerText = `+${cW} монет`;
-    document.getElementById('resTrophies').innerText = `+${tW} кубков`;
-    document.getElementById('ui').style.display='none';
-    document.getElementById('resultScreen').style.display='flex';
-}
+function startAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='square';o.frequency.setValueAtTime(150,audioCtx.currentTime);g.gain.setValueAtTime(0.01,audioCtx.currentTime);o.connect(g);g.connect(audioCtx.destination);o.start()}
 
-// ... Логика игры (F класс, loop, controls) такая же, как в прошлых версиях ...
-// При отрисовке Пчелы в классе F:
-// ctx.fillText((this.cl.n==='Bee' && D.clHeart)?'❤️🐝':this.cl.e, this.x, dy);
+function inO(x,y){return obs.some(o=>Math.hypot(x-o.x,y-o.y)<o.r+20)}
 
-function updateNick(){let n=document.getElementById('nickInput').value; if(n){D.nick=n;save()}}
-function upS(){let h='';/*...*/ document.getElementById('shopList').innerHTML=h}
-function startGame(m){active=1;mode=m;bS=0;rS=0;bullets=[];gems=[];uH=0;webs=[];mTime=Date.now();save();document.querySelectorAll('.overlay').forEach(o=>o.style.display='none');document.getElementById('ui').style.display='block';initL()}
-function initL(){obs=[];for(let i=0;i<6;i++)obs.push({x:Math.random()*(canvas.width-200)+100,y:Math.random()*(canvas.height-200)+100,r:35});tB=[new F('blue',100,canvas.height/2,1,D.selected)];tR=[new F('red',canvas.width-100,canvas.height/2)]}
-class F{constructor(side,x,y,isP,type){this.side=side;this.isP=isP;this.cl=C[type||'bee'];this.x=x;this.y=y;this.hp=this.cl.h;this.dead=0;this.lS=0;this.g=0;this.j={a:0}}
-draw(){if(this.dead)return;ctx.font="40px Arial";
-let icon = this.cl.e;
-if(this.isP && D.selected === 'bee' && D.clHeart) icon = '❤️🐝';
-ctx.fillText(icon,this.x,this.y);}}
-// ... (остальной код для стрельбы и движения)
-let J={move:{a:0},atk:{a:0},ult:{a:0}};
-function loop(){if(!active)return;ctx.fillStyle='#2d5a27';ctx.fillRect(0,0,canvas.width,canvas.height);all=[...tB,...tR];all.forEach(f=>{f.draw()});requestAnimationFrame(loop)}
-save();loop();
-</script></body></html>
+class F{constructor(side,x,y,isP,type){this.side=side;this.isP=isP;this.nick=isP?D.nick:NAMES[Math.floor(Math.random()*NAMES.length)];this.cl=C[type||'bee'];this.x=x;this.y=y;this.hp=this.cl.h;this.dead=0;this.lS=0;this.g=0;this.j={a:0,t:0,sx:0,sy:0,tx:0,ty:0}}
+draw(){if(this.dead)return;ctx.textAlign="center";ctx.fillStyle=this.side==='blue'?'#0cf':'#f44';ctx.font="bold 12px Arial";ctx.fillText(this.nick,this.x,this.y-45);ctx.font="40px Arial";
+let icon=this.cl.e; if(this.isP && D.selected==='bee' && D.clHeart) icon='❤️🐝';
+ctx.fillText(icon,this.x,this.y);
+ctx.fillStyle='#000';ctx.fillRect(this.x-20,this.y-38,40,5);ctx.fillStyle=this.side==='blue'?'#0f0':'#f00';ctx.fillRect(this.x-20,this.y-38,(this.hp/this.cl.h)*40,5)}
+shoot(a,u=0){if(this.dead||Date.now()-this.lS< (u?0:this.cl.r))return;this.lS=Date.now();
+if(u){if(this.cl.t==='spider')webs.push({x:this.x+Math.cos(a)*150,y:this.y+Math.sin(a)*150,t:Date.now()+8000});else bullets.push({x:this.x,y:this.y,vx:Math.cos(a)*10,vy:Math.sin(a)*10,side:this.side,e:'🔥',d:120,u:1})}
+else{let be=(this.cl.t==='spider')?'🕸️':'📍';bullets.push({x:this.x,y:this.y,vx:Math.cos(a)*9,vy:Math.sin(a)*9,side:this.side,e:be,d:35})}}
+die(){this.dead=1;if(mode==='arena'){if(this.side==='blue')rS++;else bS++;upScore()}setTimeout(()=>{if(active){this.dead=0;this.hp=this.cl.h;this.x=this.side==='blue'?100:canvas.width-100}},3000)}}
+
+function startGame(m){active=1;mode=m;bS=0;rS=0;bullets=[];gems=[];uH=0;webs=[];mTime=Date.now();document.querySelectorAll('.overlay').forEach(o=>o.style.display='none');document.getElementById('ui').style.display='block';upScore();initL()}
+function initL(){obs=[];for(let i=0;i<5;i++)obs.push({x:Math.random()*(canvas.width-200)+100,y:Math.random()*(canvas.height-200)+100,r:35});tB=[new F('blue',100,canvas.height/2,1,D.selected)];tR=[new F('red',canvas.width-100,canvas.height/2,0,'fly')]}
+function upScore(){document.getElementById('scoreText').innerHTML=`${bS} : ${rS}`}
+
+function endG(w){active=0;let cW=w?150:40,tW=w?Math.floor(Math.random()*3)+6:0;D.coins+=cW;D.trophies+=tW;save();document.getElementById('resTitle').innerText=w?"ПОБЕДА":"ПОРАЖЕНИЕ";document.getElementById('resReward').innerText=`+${cW} монет`;document.getElementById('resTrophies').innerText=`+${tW} кубков`;document.getElementById('ui').style.display='none';document.getElementById('resultScreen').style.display='flex'}
+
+canvas.addEventListener('touchstart',e=>{if(!active)return;for(let t of e.changedTouches){let x=t.clientX;if(x<canvas.width/2)J.move={a:1,sx:x,sy:t.clientY,cx:x,cy:t.clientY,id:t.identifier};else J.atk={a:1,sx:x,sy:t.clientY,cx:x,cy:t.clientY,id:t.identifier,ang:0}}});
+canvas.addEventListener('touchmove',e=>{for(let t of e.changedTouches){if(J.move.id===t.identifier){J.move.cx=t.clientX;J.move.cy=t.clientY}if(J.atk.id===t.identifier){J.atk.cx=t.clientX;J.atk.cy=t.clientY;J.atk.ang=Math.atan2(t.clientY-J.atk.sy,t.clientX-J.atk.sx)}}e.preventDefault()},{passive:false});
+canvas.addEventListener('touchend',e=>{for(let t of e.changedTouches){if(J.move.id===t.identifier)J.move.a=0;if(J.atk.id===t.identifier){if(Math.hypot(J.atk.cx-J.atk.sx,J.atk.cy-J.atk.sy)>20)tB[0].shoot(J.atk.ang);J.atk.a=0}}});
+
+function loop(){if(!active){requestAnimationFrame(loop);return}
+ctx.fillStyle='#2d5a27';ctx.fillRect(0,0,canvas.width,canvas.height);
+obs.forEach(o=>ctx.fillText('🪨',o.x,o.y));
+webs=webs.filter(w=>w.t>Date.now());webs.forEach(w=>{ctx.fillText('🕸️',w.x,w.y)});
+if(mode==='gems'){ctx.fillText('💎',canvas.width/2,canvas.height/2);if(Date.now()-mTime>7000){gems.push({x:canvas.width/2,y:canvas.height/2});mTime=Date.now()}}
+gems.forEach((g,i)=>{ctx.fillText('💎',g.x,g.y);[...tB,...tR].forEach(f=>{if(!f.dead&&Math.hypot(f.x-g.x,f.y-g.y)<30){f.g++;gems.splice(i,1);if(mode==='gems'){bS=tB[0].g;rS=tR[0].g;upScore()}}})});
+[...tB,...tR].forEach(f=>{if(!f.dead){
+    let sp=f.cl.s; if(webs.some(w=>Math.hypot(f.x-w.x,f.y-w.y)<60))sp/=3;
+    if(f.isP && J.move.a){let dx=J.move.cx-J.move.sx,dy=J.move.cy-J.move.sy,d=Math.hypot(dx,dy);if(d>5){f.x+=(dx/d)*sp;f.y+=(dy/d)*sp}}
+    if(!f.isP){let tar=tB[0];let a=Math.atan2(tar.y-f.y,tar.x-f.x);f.x+=Math.cos(a)*sp;f.y+=Math.sin(a)*sp;if(Date.now()-f.lS>f.cl.r)f.shoot(a)}
+}f.draw()});
+bullets.forEach((b,i)=>{b.x+=b.vx;b.y+=b.vy;ctx.fillText(b.e,b.x,b.y);(b.side==='blue'?tR:tB).forEach(v=>{if(!v.dead&&Math.hypot(b.x-v.x,b.y-v.y)<30){v.hp-=b.d;bullets.splice(i,1)}});if(inO(b.x,b.y))bullets.splice(i,1)});
+if(mode==='arena'&&(bS>=5||rS>=5))endG(bS>=5);if(mode==='gems'&&(bS>=10||rS>=10))endG(bS>=10);
+requestAnimationFrame(loop)}
+save();loop();</script></body></html>
