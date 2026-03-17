@@ -2,161 +2,103 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub - user/bee-brawl-engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bee Brawl: Balanced Ranks</title>
     <style>
-        :root {
-            --gh-bg: #0d1117; --gh-canvas: #010409; --gh-border: #30363d;
-            --gh-text: #c9d1d9; --gh-link: #58a6ff; --gh-success: #238636;
-        }
-        body {
-            margin: 0; background-color: var(--gh-bg); color: var(--gh-text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            font-size: 14px; line-height: 1.5;
-        }
-
-        /* Header GitHub */
-        .gh-header {
-            background-color: #161b22; padding: 16px 32px;
-            border-bottom: 1px solid var(--gh-border); display: flex; align-items: center; gap: 10px;
-        }
-        .repo-title { font-size: 20px; font-weight: 600; color: var(--gh-link); }
-        .label { border: 1px solid var(--gh-border); padding: 2px 7px; border-radius: 20px; font-size: 12px; color: #8b949e; }
-
-        /* Вкладки */
-        .gh-tabs {
-            display: flex; padding: 0 32px; border-bottom: 1px solid var(--gh-border);
-            margin-bottom: 20px; background: #161b22;
-        }
-        .tab {
-            padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .tab.active { border-color: #f78166; font-weight: 600; }
-
-        /* Основной контейнер */
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 16px; }
-
-        /* Окно игры (как File Explorer) */
-        .file-box {
-            border: 1px solid var(--gh-border); border-radius: 6px; overflow: hidden;
-            background-color: var(--gh-canvas);
-        }
-        .file-header {
-            background-color: #161b22; padding: 12px; border-bottom: 1px solid var(--gh-border);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-
-        /* Игровой экран */
-        .game-viewport {
-            min-height: 400px; display: none; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px;
-        }
-        .game-viewport.active { display: flex; }
-
-        /* Стили кнопок GitHub */
-        .btn-gh {
-            background-color: #21262d; border: 1px solid var(--gh-border);
-            color: var(--gh-link); padding: 5px 12px; border-radius: 6px;
-            font-weight: 500; cursor: pointer; font-size: 14px;
-        }
-        .btn-gh-primary {
-            background-color: var(--gh-success); color: white; border: none;
-        }
-
-        /* README Секция */
-        .readme-box {
-            border: 1px solid var(--gh-border); border-radius: 6px; margin-top: 20px; padding: 32px;
-            background-color: var(--gh-bg); text-align: left;
-        }
-
-        /* Арена */
-        #arena {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #010409; z-index: 1000; display: none; cursor: crosshair;
-        }
-        #bear { position: absolute; font-size: 60px; transition: 0.4s; }
-        .projectile { position: absolute; font-size: 20px; pointer-events: none; }
+        :root { --gold: #f1c40f; --blue: #3498db; --red: #e74c3c; --purple: #9b59b6; --green: #2ecc71; }
+        body { margin: 0; background: #1a1a1a; color: white; font-family: 'Arial Black', sans-serif; text-align: center; overflow: hidden; touch-action: manipulation; }
         
-        /* Статистика как теги */
-        .stats-bar { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tag { background: #1f6feb22; color: #58a6ff; border: 1px solid #1f6feb; padding: 2px 10px; border-radius: 12px; font-size: 12px; }
+        .header { display: flex; justify-content: center; gap: 8px; padding: 10px; background: #000; border-bottom: 2px solid #333; }
+        .box { background: #222; padding: 5px 12px; border-radius: 20px; border: 2px solid #fff; font-size: 14px; }
+
+        .screen { display: none; height: calc(100vh - 60px); flex-direction: column; align-items: center; justify-content: space-between; padding: 15px 10px; box-sizing: border-box; }
+        .active { display: flex; }
+
+        #main-sprite { font-size: 100px; margin: 10px 0; }
+        .rank-zone { width: 80%; max-width: 300px; }
+        .progress-bg { width: 100%; height: 16px; background: #333; border-radius: 8px; border: 2px solid #fff; overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; background: var(--gold); width: 0%; transition: 0.3s; }
+        .progress-text { position: absolute; width: 100%; top: 0; font-size: 11px; line-height: 16px; text-shadow: 1px 1px #000; font-weight: bold; }
+
+        .play-btn { background: var(--gold); border: none; width: 85%; padding: 20px; font-size: 30px; border-radius: 20px; border-bottom: 8px solid #d35400; color: #fff; cursor: pointer; font-family: 'Arial Black', sans-serif; }
+        .btn-nav { padding: 12px 5px; font-size: 10px; border-radius: 10px; border: none; color: white; cursor: pointer; width: 30%; font-weight: bold; }
+
+        #battle-arena { width: 95%; height: 350px; background: #27ae60; border: 5px solid #1e8449; border-radius: 25px; position: relative; overflow: hidden; margin: 10px 0; touch-action: none; }
+        #bear-target { position: absolute; font-size: 60px; transition: top 0.4s, left 0.4s; z-index: 10; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
+        .projectile { position: absolute; font-size: 20px; z-index: 5; transition: all 0.3s linear; pointer-events: none; }
+        .hp-bar-float { width: 60px; height: 6px; background: #000; border: 1px solid #fff; position: absolute; top: -10px; }
+
+        .item-row { background: #333; padding: 12px; border-radius: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--gold); }
+        .ach-btn { background: var(--green); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+        
+        .card { background: #222; padding: 10px; border-radius: 15px; border: 3px solid transparent; }
+        .selected { border-color: var(--gold); background: #333; }
+        .locked { opacity: 0.4; filter: grayscale(1); }
     </style>
 </head>
 <body>
 
-<div class="gh-header">
-    <span style="font-size: 24px;">📁</span>
-    <span class="repo-title">user / bee-brawl-engine</span>
-    <span class="label">Public</span>
-</div>
-
-<div class="gh-tabs">
-    <div class="tab active" onclick="nav('code', this)"><span>📄</span> Code</div>
-    <div class="tab" onclick="nav('shop', this)"><span>⚡</span> Upgrades</div>
-    <div class="tab" onclick="nav('hive', this)"><span>🐝</span> Hive</div>
-    <div class="tab" onclick="nav('issues', this)"><span>🚫</span> Issues (0)</div>
-</div>
-
-<div class="container">
-    <div class="stats-bar">
-        <span class="tag">🏆 Trophy: <span id="total-t">0</span></span>
-        <span class="tag" style="border-color: #d29922; color: #d29922;">🍯 Honey: <span id="coins">0</span></span>
-        <span class="tag" style="border-color: #3fb950; color: #3fb950;">Branch: main</span>
+<div id="game">
+    <div class="header">
+        <div class="box">🏆 <span id="total-t">0</span></div>
+        <div class="box" style="color:var(--gold)">🍯 <span id="coins">0</span></div>
     </div>
 
-    <div class="file-box">
-        <div class="file-header">
-            <span><b>bee_brawl_game.exe</b></span>
-            <button class="btn-gh">History</button>
-        </div>
-
-        <div id="code-view" class="game-viewport active">
-            <div id="hero-display" style="font-size: 100px;">🐝</div>
-            <h2 id="rank-text">RANK 1</h2>
-            <div style="width: 250px; background: #30363d; height: 8px; border-radius: 4px; margin-bottom: 20px;">
-                <div id="rank-fill" style="width: 0%; height: 100%; background: #3fb950; border-radius: 4px;"></div>
+    <div id="menu" class="screen active">
+        <div></div>
+        <div id="main-sprite">🐝</div>
+        <div class="rank-zone">
+            <span class="rank-title" id="cur-rank" style="color:var(--gold)">РАНГ 1</span>
+            <div class="progress-bg">
+                <div id="rank-fill" class="progress-fill"></div>
+                <div class="progress-text"><span id="cur-t">0</span> / 25</div>
             </div>
-            <button class="btn-gh-primary" style="padding: 15px 40px; font-size: 18px; border-radius: 6px;" onclick="startFight()">
-                Run script: ./start_battle.sh
-            </button>
         </div>
-
-        <div id="shop-view" class="game-viewport">
-            <h3>Upgrade Modules</h3>
-            <div id="shop-list" style="width: 100%; max-width: 500px;"></div>
-        </div>
-
-        <div id="hive-view" class="game-viewport">
-            <h3>Characters Registry</h3>
-            <div id="hive-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <button class="play-btn" onclick="startFight()">В БОЙ!</button>
+            <div style="display:flex; gap:5px; width:100%; justify-content:center;">
+                <button class="btn-nav" style="background:var(--blue)" onclick="changeScreen('hive')">УЛЕЙ</button>
+                <button class="btn-nav" id="up-btn" style="background:var(--green); display:none;" onclick="changeScreen('upgrades')">СИЛА</button>
+                <button class="btn-nav" style="background:var(--purple)" onclick="changeScreen('achievements')">ДОСТИЖЕНИЯ</button>
+            </div>
         </div>
     </div>
 
-    <div class="readme-box">
-        <h3>📖 README.md</h3>
-        <hr style="border: 0; border-top: 1px solid var(--gh-border); margin: 16px 0;">
-        <p><b>Bee Brawl Engine</b> — кликер-шутер с открытым исходным кодом. Развивай свою пчелиную армию и сражайся с медведями.</p>
-        <ul>
-            <li>Целься точно в медведя, чтобы наносить урон.</li>
-            <li>Собирай бикоины для разблокировки новых модулей (героев).</li>
-            <li>Тайм-аут атаки медведя настроен на 5 секунд.</li>
-        </ul>
+    <div id="achievements" class="screen">
+        <h3>ДОСТИЖЕНИЯ</h3>
+        <div id="ach-list" style="width:100%; overflow-y:auto; flex-grow:1"></div>
+        <button class="play-btn" style="font-size:18px; padding:10px; width:150px" onclick="changeScreen('menu')">НАЗАД</button>
     </div>
-</div>
 
-<div id="arena" onclick="shoot(event)">
-    <div id="bear">🐻</div>
-    <div id="player" style="position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); font-size: 60px;">🐝</div>
-    <div style="position: absolute; top: 20px; width: 100%; text-align: center;">
-        <h1 id="fight-status">STATUS: RUNNING...</h1>
-        <div class="tag" style="background: red; color: white;">HEALTH: <span id="hp">100</span>%</div>
+    <div id="hive" class="screen">
+        <h3>УЛЕЙ</h3>
+        <div id="hive-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; width:100%"></div>
+        <button class="play-btn" style="font-size:18px; padding:10px; width:150px" onclick="changeScreen('menu')">НАЗАД</button>
+    </div>
+
+    <div id="upgrades" class="screen">
+        <h3>МАГАЗИН СИЛЫ</h3>
+        <div style="width:100%">
+            <div class="item-row"><div><b>Бонус: +<span id="bonus-val">0</span></b></div><button class="ach-btn" onclick="buyUpgrade('bonus')"><span id="bonus-cost">150</span>🍯</button></div>
+            <div class="item-row"><div><b>Защита: -<span id="prot-val">0</span></b></div><button class="ach-btn" onclick="buyUpgrade('prot')"><span id="prot-cost">200</span>🍯</button></div>
+        </div>
+        <button class="play-btn" style="font-size:18px; padding:10px; width:150px" onclick="changeScreen('menu')">НАЗАД</button>
+    </div>
+
+    <div id="fight" class="screen">
+        <h2 id="b-status" style="margin:0">ОГОНЬ!</h2>
+        <div id="battle-arena" onclick="shoot(event)">
+            <div id="player-hero" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); font-size:50px; transition:0.2s; pointer-events:none;">🐝</div>
+            <div id="bear-target">🐻<div class="hp-bar-float"><div id="e-hp" style="height:100%; width:100%; background:var(--red)"></div></div></div>
+        </div>
+        <div class="box" style="width:80%">Жизни: <span id="p-hp-text">100</span>%</div>
     </div>
 </div>
 
 <script>
-    const SAVE_KEY = 'BeeBrawl_GitHub_Edition';
-    let coins = 0, totalT = 0, sel = 'bee', up_bonus = 0, up_prot = 0, claimed = [];
+    const SAVE_KEY = 'BeeBrawl_Universal_Save';
+    
+    let coins = 0, totalT = 0, sel = 'bee', up_bonus = 0, up_prot = 0, gamesPlayed = 0, claimedAchs = [];
     let chars = {
         bee: { em: '🐝', t: 0, open: true, p: 0, proj: '📍' },
         fly: { em: '🪰', t: 0, open: false, p: 250, proj: '🦠' },
@@ -164,113 +106,182 @@
         mosq: { em: '🦟', t: 0, open: false, p: 800, proj: '💉' },
         grass: { em: '🦗', t: 0, open: false, p: 1200, proj: '🌿' }
     };
-    let bHP, pHP, bTimer, bMove, isFreeze = false;
 
-    function nav(view, el) {
-        document.querySelectorAll('.game-viewport').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(view + '-view').classList.add('active');
-        el.classList.add('active');
-    }
+    let bHP, pHP, bearAttackTimer, bearMoveInterval, isFreeze = false;
 
     function save() {
-        localStorage.setItem(SAVE_KEY, JSON.stringify({ coins, totalT, sel, chars, up_bonus, up_prot, claimed }));
+        const data = { coins, totalT, sel, chars, up_bonus, up_prot, gamesPlayed, claimedAchs };
+        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
     }
 
     function load() {
-        const d = JSON.parse(localStorage.getItem(SAVE_KEY) || localStorage.getItem('BeeBrawl_Site_V1'));
-        if (d) {
-            coins = d.coins || 0; totalT = d.totalT || 0; sel = d.sel || 'bee';
-            chars = d.chars || chars; up_bonus = d.up_bonus || 0;
-            up_prot = d.up_prot || 0; claimed = d.claimed || [];
+        const oldKeys = ['BeeBrawl_Skill_Save', 'BeeBrawl_Final_V4', 'BeeBrawl_Final_Save', SAVE_KEY];
+        let savedData = null;
+        for (let key of oldKeys) {
+            let data = localStorage.getItem(key);
+            if (data) savedData = JSON.parse(data);
+        }
+        if (savedData) {
+            coins = savedData.coins || 0; totalT = savedData.totalT || 0; sel = savedData.sel || 'bee';
+            chars = savedData.chars || chars; up_bonus = savedData.up_bonus || 0; 
+            up_prot = savedData.up_prot || 0; gamesPlayed = savedData.gamesPlayed || 0;
+            claimedAchs = savedData.claimedAchs || [];
         }
         update();
     }
 
     function update() {
-        const c = chars[sel];
+        let c = chars[sel];
         document.getElementById('total-t').innerText = Math.floor(totalT);
         document.getElementById('coins').innerText = Math.floor(coins);
-        document.getElementById('hero-display').innerText = c.em;
-        document.getElementById('rank-text').innerText = "RANK " + (Math.floor(c.t/25)+1);
-        document.getElementById('rank-fill').style.width = (c.t%25/25*100) + "%";
+        document.getElementById('cur-rank').innerText = "РАНГ " + (Math.floor(c.t / 25) + 1);
+        document.getElementById('cur-t').innerText = Math.floor(c.t % 25);
+        document.getElementById('rank-fill').style.width = ((c.t % 25) / 25 * 100) + "%";
+        document.getElementById('main-sprite').innerText = c.em;
+        document.getElementById('up-btn').style.display = totalT >= 250 ? 'block' : 'none';
         
-        renderHive(); renderShop();
+        document.getElementById('bonus-val').innerText = (up_bonus * 0.25).toFixed(2);
+        document.getElementById('bonus-cost').innerText = (up_bonus + 1) * 150;
+        document.getElementById('prot-val').innerText = (up_prot * 0.2).toFixed(1);
+        document.getElementById('prot-cost').innerText = (up_prot + 1) * 200;
+
+        renderHive(); renderAchs();
     }
 
-    function renderShop() {
-        const s = document.getElementById('shop-list');
-        const mods = [
-            { id: 'bonus', n: 'Efficiency Module', c: (up_bonus+1)*150, v: up_bonus },
-            { id: 'prot', n: 'Security Protocol', c: (up_prot+1)*200, v: up_prot }
+    function renderAchs() {
+        const container = document.getElementById('ach-list'); container.innerHTML = '';
+        const achievements = [
+            { id: 'up_open', txt: 'Открой Силу', rew: 35, check: () => totalT >= 250 },
+            { id: 'all_chars', txt: 'Собери всех', rew: 100, check: () => Object.values(chars).every(c => c.open) },
+            { id: 'push_1000', txt: 'Запуши 1000🏆', rew: 60, check: () => totalT >= 1000 },
+            { id: 'play_50', txt: 'Сыграй 50 раз', rew: 50, check: () => gamesPlayed >= 50 }
         ];
-        s.innerHTML = mods.map(m => `
-            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333">
-                <span>${m.n} (lvl ${m.v})</span>
-                <button class="btn-gh" onclick="buyUp('${m.id}')">${m.c} 🍯</button>
-            </div>
-        `).join('');
+        achievements.forEach(a => {
+            const isClaimed = claimedAchs.includes(a.id);
+            const canClaim = a.check() && !isClaimed;
+            container.innerHTML += `<div class="item-row"><div><b>${a.txt}</b><br><small>${a.rew}🍯</small></div>
+                <button class="ach-btn" ${!canClaim ? 'disabled' : ''} onclick="claimAch('${a.id}', ${a.rew})">${isClaimed ? 'ВЗЯТО' : 'ЗАБРАТЬ'}</button></div>`;
+        });
     }
+
+    function claimAch(id, rew) { claimedAchs.push(id); coins += rew; save(); update(); }
 
     function renderHive() {
-        const g = document.getElementById('hive-grid');
-        g.innerHTML = Object.keys(chars).map(id => `
-            <div class="btn-gh" style="padding:15px; text-align:center; opacity:${chars[id].open?1:0.5}" onclick="${chars[id].open?`set('${id}')`:`buyC('${id}')`}">
-                <div style="font-size:30px">${chars[id].em}</div>
-                <small>${chars[id].open ? (id==sel?'ACTIVE':'SELECT') : chars[id].p+'🍯'}</small>
-            </div>
-        `).join('');
+        const grid = document.getElementById('hive-grid'); grid.innerHTML = '';
+        for (let id in chars) {
+            const c = chars[id];
+            grid.innerHTML += `<div class="card ${id === sel ? 'selected' : ''} ${!c.open ? 'locked' : ''}" onclick="${c.open ? `selectChar('${id}')` : `buyChar('${id}')`}">
+                <div style="font-size:30px">${c.em}</div><small>${c.open ? 'ВЫБРАТЬ' : c.p + '🍯'}</small></div>`;
+        }
     }
 
-    function set(id) { sel = id; save(); update(); }
-    function buyC(id) { if(coins>=chars[id].p){ coins-=chars[id].p; chars[id].open=true; save(); update(); } }
-    function buyUp(t) {
-        let cost = t=='bonus'?(up_bonus+1)*150:(up_prot+1)*200;
-        if(coins>=cost){ coins-=cost; if(t=='bonus')up_bonus++; else up_prot++; save(); update(); }
+    function buyChar(id) { if (coins >= chars[id].p) { coins -= chars[id].p; chars[id].open = true; save(); update(); } }
+    function selectChar(id) { sel = id; save(); update(); }
+    function buyUpgrade(type) {
+        let cost = type === 'bonus' ? (up_bonus + 1) * 150 : (up_prot + 1) * 200;
+        if (coins >= cost) { coins -= cost; if (type === 'bonus') up_bonus++; else up_prot++; save(); update(); }
     }
 
     function startFight() {
-        bHP = 100; pHP = 100; isFreeze = false;
-        document.getElementById('hp').innerText = pHP;
-        document.getElementById('player').innerText = chars[sel].em;
-        document.getElementById('arena').style.display = 'block';
+        bHP = 100; pHP = 100; gamesPlayed++; isFreeze = false;
+        document.getElementById('p-hp-text').innerText = pHP;
+        document.getElementById('e-hp').style.width = '100%';
+        document.getElementById('player-hero').innerText = chars[sel].em;
+        document.getElementById('b-status').innerText = "БОЙ!";
+        changeScreen('fight');
         moveBear();
-        bMove = setInterval(moveBear, 1200);
-        bTimer = setInterval(() => { if(!isFreeze){ pHP-=20; document.getElementById('hp').innerText = pHP; if(pHP<=0) end(false); } }, 5000);
+        bearMoveInterval = setInterval(moveBear, 1200);
+        bearAttackTimer = setInterval(bearAttack, 5000); 
     }
 
     function moveBear() {
-        const b = document.getElementById('bear');
-        b.style.left = Math.random()*80 + '%';
-        b.style.top = (Math.random()*40 + 20) + '%';
+        if (isFreeze) return;
+        const arena = document.getElementById('battle-arena');
+        const bear = document.getElementById('bear-target');
+        bear.style.left = Math.random() * (arena.offsetWidth - 80) + 'px';
+        bear.style.top = Math.random() * (arena.offsetHeight - 180) + 'px';
     }
 
     function shoot(e) {
-        if(e.target.id == 'arena') {
+        const arena = document.getElementById('battle-arena');
+        const rect = arena.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        if (sel === 'grass') { jumpAttack(clickX, clickY); return; }
+        const count = (sel === 'fly') ? 3 : 1;
+        for(let i=0; i<count; i++) {
             const p = document.createElement('div');
             p.className = 'projectile'; p.innerText = chars[sel].proj;
-            p.style.left = '50%'; p.style.bottom = '50px';
-            document.getElementById('arena').appendChild(p);
+            p.style.left = '50%'; p.style.bottom = '20px';
+            arena.appendChild(p);
+            let spread = (sel === 'fly') ? (i - 1) * 45 : 0;
             setTimeout(() => {
-                p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
-                setTimeout(() => {
-                    const br = document.getElementById('bear').getBoundingClientRect();
-                    if(Math.abs(e.clientX - (br.left+35)) < 45 && Math.abs(e.clientY - (br.top+35)) < 45) {
-                        bHP -= 20; if(bHP <= 0) end(true);
-                    }
-                    p.remove();
-                }, 300);
+                p.style.left = (clickX + spread) + 'px'; p.style.top = clickY + 'px';
+                setTimeout(() => { checkHit(clickX + spread, clickY); p.remove(); }, 300);
             }, 10);
         }
     }
 
-    function end(win) {
-        clearInterval(bMove); clearInterval(bTimer);
-        const c = chars[sel];
-        let change = win ? (c.t<100?10:(c.t<350?8:6)) : (c.t<100?0:4);
-        if(win) { c.t += change; totalT += change; } else { c.t = Math.max(0, c.t-change); totalT = Math.max(0, totalT-change); }
-        document.getElementById('fight-status').innerText = win ? "SUCCESS: TROPHIES ADDED" : "ERROR: DEFEAT DETECTED";
-        setTimeout(() => { document.getElementById('arena').style.display = 'none'; save(); update(); }, 2000);
+    function jumpAttack(tx, ty) {
+        const hero = document.getElementById('player-hero'); const bear = document.getElementById('bear-target');
+        isFreeze = true; hero.style.bottom = (350 - ty) + 'px'; hero.style.left = tx + 'px';
+        setTimeout(() => {
+            const bRect = bear.getBoundingClientRect(); const hRect = hero.getBoundingClientRect();
+            if (Math.abs(hRect.left - bRect.left) < 65 && Math.abs(hRect.top - bRect.top) < 65) applyDamage(20);
+            setTimeout(() => { hero.style.bottom = '20px'; hero.style.left = '50%'; isFreeze = false; }, 300);
+        }, 150);
+    }
+
+    function checkHit(px, py) {
+        const bear = document.getElementById('bear-target'); const bRect = bear.getBoundingClientRect();
+        const aRect = document.getElementById('battle-arena').getBoundingClientRect();
+        const bx = bRect.left - aRect.left + 35; const by = bRect.top - aRect.top + 35;
+        if (Math.abs(px - bx) < 45 && Math.abs(py - by) < 45) applyDamage(15);
+    }
+
+    function applyDamage(dmg) {
+        bHP -= dmg; document.getElementById('e-hp').style.width = bHP + '%';
+        if (bHP <= 0) endBattle(true);
+    }
+
+    function bearAttack() {
+        if (isFreeze) return;
+        pHP -= 20; document.getElementById('p-hp-text').innerText = pHP;
+        if (pHP <= 0) endBattle(false);
+    }
+
+    function endBattle(win) {
+        clearInterval(bearAttackTimer); clearInterval(bearMoveInterval);
+        let c = chars[sel];
+        let change = 0;
+
+        if(win) {
+            // НОВЫЙ БАЛАНС КУБКОВ ПО ТВОЕМУ ЗАПРОСУ
+            if (c.t < 100) change = 10;
+            else if (c.t < 350) change = 8;
+            else change = 6;
+
+            change += (up_bonus * 0.25);
+            document.getElementById('b-status').innerHTML = `<span style="color:var(--green)">+${change.toFixed(1)}🏆</span>`;
+            c.t += change; totalT += change;
+            
+            // Награда бикоинами (каждые 50 общих кубков)
+            if (Math.floor(totalT/50) > Math.floor((totalT-change)/50)) {
+                coins += (totalT <= 250 ? 35 : 25);
+            }
+        } else {
+            // Штраф при сливе
+            change = Math.max(0, (c.t < 100 ? 0 : 4) - (up_prot * 0.2));
+            document.getElementById('b-status').innerHTML = `<span style="color:var(--red)">-${change.toFixed(1)}🏆</span>`;
+            c.t = Math.max(0, c.t - change); totalT = Math.max(0, totalT - change);
+        }
+        c.t = parseFloat(c.t.toFixed(2)); totalT = parseFloat(totalT.toFixed(2));
+        save(); setTimeout(() => { update(); changeScreen('menu'); }, 2000);
+    }
+
+    function changeScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'flex';
     }
 
     window.onload = load;
