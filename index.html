@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Bee Brawl Easy Mode</title>
+    <title>Bee Brawl FIXED</title>
     <style>
         :root { --gold: #f1c40f; --blue: #3498db; --red: #e74c3c; --green: #2ecc71; --bg: #121212; }
         body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; touch-action: manipulation; }
 
-        /* Интерфейс */
         .header { display: flex; justify-content: space-around; padding: 15px 10px; background: #000; border-bottom: 2px solid #333; }
         .box { background: #222; padding: 5px 15px; border-radius: 20px; border: 1px solid #555; font-weight: bold; font-size: 14px; }
 
-        .screen { display: none; height: calc(100vh - 130px); flex-direction: column; align-items: center; padding: 20px 15px; overflow-y: auto; box-sizing: border-box; }
+        .screen { display: none; height: calc(100vh - 130px); flex-direction: column; align-items: center; padding: 20px 15px; overflow-y: auto; box-sizing: border-box; width: 100%; }
         .active { display: flex; }
 
         #main-sprite { font-size: 100px; margin: 20px 0; }
@@ -22,21 +21,21 @@
 
         .play-btn { background: var(--gold); border: none; width: 100%; max-width: 280px; padding: 20px; font-size: 28px; border-radius: 20px; box-shadow: 0 6px 0 #d35400; color: #000; font-weight: 900; margin-top: auto; }
 
-        /* Навигация */
         .nav-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; }
-        .nav-item { color: #888; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item { color: #888; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
         .nav-item.active { color: var(--gold); }
         .nav-icon { font-size: 24px; }
 
-        /* АРЕНА И МЕДВЕДЬ */
+        /* Магазин и Успехи */
+        .list-item { background: #1e1e1e; width: 100%; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        .buy-btn { background: var(--green); border: none; color: white; padding: 8px 15px; border-radius: 8px; font-weight: bold; }
+
+        /* АРЕНА */
         #arena { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1b5e20; z-index: 100; display: none; }
-        
         #bear-container { position: absolute; width: 80px; text-align: center; transition: 0.6s ease-out; }
         #bear-sprite { font-size: 60px; }
-        
         .hp-bar-bg { width: 60px; height: 6px; background: #000; border: 1px solid #fff; margin: 0 auto 5px auto; border-radius: 3px; overflow: hidden; }
         #bear-hp-fill { width: 100%; height: 100%; background: var(--red); transition: 0.2s; }
-
         #player { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); font-size: 60px; }
         .projectile { position: absolute; font-size: 24px; transition: 0.3s linear; pointer-events: none; }
         
@@ -69,11 +68,24 @@
         <div class="grid" id="hive-grid"></div>
     </div>
 
+    <div id="shop-scr" class="screen">
+        <h2>МАГАЗИН СИЛЫ</h2>
+        <div class="list-item">
+            <div><b>Бонус урона</b><br><small>+25% к силе</small></div>
+            <button class="buy-btn" onclick="buyUp('bonus')"><span id="b-cost">150</span>🍯</button>
+        </div>
+    </div>
+
+    <div id="ach-scr" class="screen">
+        <h2>УСПЕХИ</h2>
+        <div id="ach-list" style="width:100%"></div>
+    </div>
+
     <div class="nav-bar">
         <div class="nav-item active" onclick="nav('home-scr', this)"> <span class="nav-icon">🏠</span><span>Главная</span> </div>
         <div class="nav-item" onclick="nav('hive-scr', this)"> <span class="nav-icon">🐝</span><span>Улей</span> </div>
-        <div class="nav-item" onclick="nav('home-scr', this)"> <span class="nav-icon">⚡</span><span>Сила</span> </div>
-        <div class="nav-item" onclick="nav('home-scr', this)"> <span class="nav-icon">🏆</span><span>Успехи</span> </div>
+        <div class="nav-item" onclick="nav('shop-scr', this)"> <span class="nav-icon">⚡</span><span>Сила</span> </div>
+        <div class="nav-item" onclick="nav('ach-scr', this)"> <span class="nav-icon">🏆</span><span>Успехи</span> </div>
     </div>
 
     <div id="arena" onclick="shoot(event)">
@@ -83,20 +95,20 @@
         </div>
         <div id="player">🐝</div>
         <div style="position:absolute; top:40px; width:100%; text-align:center;">
-            <h1 id="status" style="margin:0; text-shadow: 2px 2px #000;">УДАЧИ!</h1>
+            <h1 id="status" style="margin:0; text-shadow: 2px 2px #000;">БОЙ!</h1>
         </div>
     </div>
 
 <script>
-    const SAVE_KEY = 'BeeBrawl_Mobile_Easy';
-    let coins = 0, totalT = 0, sel = 'bee';
+    const SAVE_KEY = 'BeeBrawl_Mobile_UltraFixed';
+    let coins = 0, totalT = 0, sel = 'bee', up_bonus = 0;
     let chars = {
         bee: { em: '🐝', t: 0, open: true, p: 0, proj: '📍' },
         fly: { em: '🪰', t: 0, open: false, p: 250, proj: '🦠' },
         spider: { em: '🕷️', t: 0, open: false, p: 500, proj: '🕸️' },
         mosq: { em: '🦟', t: 0, open: false, p: 800, proj: '💉' }
     };
-    let bHP, pHP, bMove, bTimer, isFreeze = false;
+    let bHP, bMove;
 
     function nav(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -106,14 +118,14 @@
     }
 
     function save() {
-        localStorage.setItem(SAVE_KEY, JSON.stringify({ coins, totalT, sel, chars }));
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ coins, totalT, sel, chars, up_bonus }));
     }
 
     function load() {
-        const d = JSON.parse(localStorage.getItem(SAVE_KEY) || localStorage.getItem('BeeBrawl_Mobile_Final'));
+        const d = JSON.parse(localStorage.getItem(SAVE_KEY));
         if (d) {
             coins = d.coins || 0; totalT = d.totalT || 0; sel = d.sel || 'bee';
-            chars = d.chars || chars;
+            chars = d.chars || chars; up_bonus = d.up_bonus || 0;
         }
         update();
     }
@@ -126,7 +138,8 @@
         document.getElementById('cur-rank').innerText = "РАНГ " + (Math.floor(c.t/25)+1);
         document.getElementById('cur-t').innerText = Math.floor(c.t%25);
         document.getElementById('rank-fill').style.width = (c.t%25/25*100) + "%";
-        renderHive();
+        document.getElementById('b-cost').innerText = (up_bonus+1)*150;
+        renderHive(); renderAchs();
     }
 
     function renderHive() {
@@ -139,18 +152,27 @@
         }
     }
 
+    function renderAchs() {
+        const l = document.getElementById('ach-list'); l.innerHTML = '';
+        const list = [{n:'Новичок', g:100}, {n:'Профи', g:500}, {n:'Мастер', g:1000}];
+        list.forEach(a => {
+            const ok = totalT >= a.g;
+            l.innerHTML += `<div class="list-item"><div><b>${a.n}</b><br><small>${a.g} 🏆</small></div><span style="color:${ok? 'var(--green)':'#555'}">${ok?'ГОТОВО':'В ПРОЦЕССЕ'}</span></div>`;
+        });
+    }
+
     function set(id) { sel = id; save(); update(); }
     function buy(id) { if(coins >= chars[id].p) { coins -= chars[id].p; chars[id].open = true; save(); update(); } }
+    function buyUp(t) { let cost = (up_bonus+1)*150; if(coins>=cost){ coins-=cost; up_bonus++; save(); update(); } }
 
     function startFight() {
-        bHP = 60; // У медведя теперь меньше здоровья (было 100)
-        pHP = 100;
+        bHP = 60; 
         document.getElementById('bear-hp-fill').style.width = '100%';
         document.getElementById('player').innerText = chars[sel].em;
         document.getElementById('status').innerText = "БЕЙ МЕДВЕДЯ!";
         document.getElementById('arena').style.display = 'block';
         moveBear();
-        bMove = setInterval(moveBear, 1400); // Медведь стал медленнее (было 1200)
+        bMove = setInterval(moveBear, 1400);
     }
 
     function moveBear() {
@@ -165,12 +187,10 @@
             p.className = 'projectile'; p.innerText = chars[sel].proj;
             p.style.left = '50%'; p.style.bottom = '90px';
             document.getElementById('arena').appendChild(p);
-            
             setTimeout(() => {
                 p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
                 setTimeout(() => {
                     const br = document.getElementById('bear-container').getBoundingClientRect();
-                    // Радиус попадания увеличен (проще попасть)
                     if(Math.abs(e.clientX - (br.left+40)) < 55 && Math.abs(e.clientY - (br.top+40)) < 55) {
                         bHP -= 20;
                         document.getElementById('bear-hp-fill').style.width = (bHP/60*100) + '%';
@@ -187,12 +207,22 @@
         const c = chars[sel];
         let change = 0;
         if(win) {
-            if (c.t < 100) change = 10;
-            else if (c.t < 350) change = 8;
-            else change = 6;
+            // СТРОГАЯ ПРОВЕРКА КУБКОВ
+            if (c.t < 100) {
+                change = 10;
+            } else if (c.t < 350) {
+                change = 8;
+            } else {
+                change = 6;
+            }
             
-            c.t += change; totalT += change;
-            if (Math.floor(totalT/50) > Math.floor((totalT-change)/50)) coins += (totalT <= 250 ? 35 : 25);
+            c.t += change; 
+            totalT += change;
+            
+            // Награда медом за каждые 50 кубков (общего счета)
+            if (Math.floor(totalT/50) > Math.floor((totalT-change)/50)) {
+                coins += (totalT <= 250 ? 35 : 25);
+            }
             document.getElementById('status').innerText = "+" + change + "🏆 ПОБЕДА!";
         } else {
             change = (c.t < 100 ? 0 : 4);
