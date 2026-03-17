@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Bee Brawl STABLE</title>
+    <title>Bee Brawl Stable</title>
     <style>
         :root { --gold: #f1c40f; --blue: #3498db; --red: #e74c3c; --green: #2ecc71; --bg: #121212; }
         body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; touch-action: manipulation; }
@@ -11,18 +11,27 @@
         .header { display: flex; justify-content: space-around; padding: 15px 10px; background: #000; border-bottom: 2px solid #333; height: 50px; align-items: center; }
         .box { background: #222; padding: 5px 15px; border-radius: 20px; border: 1px solid #555; font-weight: bold; font-size: 14px; }
 
-        .screen { display: none; height: calc(100vh - 120px); flex-direction: column; align-items: center; padding: 20px 15px; overflow-y: auto; box-sizing: border-box; width: 100%; }
+        .screen { display: none; height: calc(100vh - 120px); flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; box-sizing: border-box; width: 100%; }
         .active { display: flex; }
 
-        #main-sprite { font-size: 100px; margin: 20px 0; }
-        .rank-card { background: #1a1a1a; padding: 15px; border-radius: 15px; width: 90%; border: 1px solid #333; }
-        .progress-bg { width: 100%; height: 12px; background: #333; border-radius: 6px; margin-top: 8px; overflow: hidden; }
+        /* ГЛАВНЫЙ ЭКРАН - ЦЕНТРАЛИЗАЦИЯ */
+        .rank-card { background: #1a1a1a; padding: 12px; border-radius: 15px; width: 90%; border: 1px solid #333; margin-bottom: 10px; }
+        .progress-bg { width: 100%; height: 10px; background: #333; border-radius: 5px; margin-top: 5px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--gold); width: 0%; transition: 0.5s; }
 
-        .play-btn { background: var(--gold); border: none; width: 100%; max-width: 280px; padding: 20px; font-size: 28px; border-radius: 20px; box-shadow: 0 6px 0 #d35400; color: #000; font-weight: 900; margin-top: auto; margin-bottom: 10px; }
+        #main-sprite { font-size: 110px; margin: 5px 0; filter: drop-shadow(0 0 10px rgba(241,196,15,0.2)); }
+
+        .play-btn { 
+            background: var(--gold); border: none; width: 85%; max-width: 250px; 
+            padding: 15px; font-size: 24px; border-radius: 25px; 
+            box-shadow: 0 5px 0 #d35400; color: #000; font-weight: 900; 
+            margin-top: 10px; /* Кнопка теперь ближе к пчеле */
+            cursor: pointer;
+            active { transform: translateY(2px); box-shadow: 0 2px 0 #d35400; }
+        }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; }
-        .nav-item { color: #888; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; text-align: center; }
+        .nav-item { color: #888; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; }
         .nav-item.active { color: var(--gold); }
         .nav-icon { font-size: 24px; }
 
@@ -49,31 +58,35 @@
 
     <div id="home-scr" class="screen active">
         <div class="rank-card">
-            <div style="display:flex; justify-content: space-between;">
+            <div style="display:flex; justify-content: space-between; font-weight: bold; font-size: 13px;">
                 <span id="cur-rank">РАНГ 1</span>
                 <span><span id="cur-t">0</span> / 25 🏆</span>
             </div>
             <div class="progress-bg"><div id="rank-fill" class="progress-fill"></div></div>
         </div>
+        
         <div id="main-sprite">🐝</div>
+        
         <button class="play-btn" onclick="startFight()">В БОЙ!</button>
+        
+        <p style="color: #555; font-size: 11px; margin-top: 15px;">v1.5 Stable Build</p>
     </div>
 
     <div id="hive-scr" class="screen">
-        <h2>ТВОИ ПЧЕЛЫ</h2>
+        <h2 style="margin-top:0">ТВОИ ПЧЕЛЫ</h2>
         <div class="grid" id="hive-grid"></div>
     </div>
 
     <div id="shop-scr" class="screen">
-        <h2>МАГАЗИН СИЛЫ</h2>
+        <h2 style="margin-top:0">МАГАЗИН СИЛЫ</h2>
         <div class="list-item">
-            <div><b>Бонус урона</b><br><small>Убивай еще быстрее</small></div>
+            <div><b>Урон пчелы</b><br><small>Убивай медведя быстрее</small></div>
             <button style="background:var(--green); border:none; color:white; padding:8px 15px; border-radius:8px; font-weight:bold;" onclick="buyUp()">150 🍯</button>
         </div>
     </div>
 
     <div id="ach-scr" class="screen">
-        <h2>УСПЕХИ</h2>
+        <h2 style="margin-top:0">УСПЕХИ</h2>
         <div id="ach-list" style="width:100%"></div>
     </div>
 
@@ -96,7 +109,6 @@
     </div>
 
 <script>
-    // КОНСТАНТНЫЙ КЛЮЧ - ТЕПЕРЬ НЕ ПРОПАДЕТ
     const SAVE_KEY = 'BeeBrawl_FINAL_STABLE';
     let coins = 0, totalT = 0, sel = 'bee';
     let chars = {
@@ -159,13 +171,13 @@
 
     function set(id) { sel = id; save(); update(); }
     function buy(id) { if(coins >= chars[id].p) { coins -= chars[id].p; chars[id].open = true; save(); update(); } }
-    function buyUp() { if(coins>=150){ coins-=150; alert('Урон повышен!'); save(); update(); } }
+    function buyUp() { if(coins>=150){ coins-=150; alert('Сила атаки выросла!'); save(); update(); } }
 
     function startFight() {
         bHP = 60; 
         document.getElementById('bear-hp-fill').style.width = '100%';
         document.getElementById('player').innerText = chars[sel].em;
-        document.getElementById('status').innerText = "БЕЙ МЕДВЕДЯ!";
+        document.getElementById('status').innerText = "БЕЙ!";
         document.getElementById('arena').style.display = 'block';
         moveBear();
         bMove = setInterval(moveBear, 1400);
@@ -203,18 +215,17 @@
         const c = chars[sel];
         let change = 0;
         if(win) {
-            // ФИКСИРОВАННОЕ НАЧИСЛЕНИЕ
             if (c.t < 100) change = 10;
             else if (c.t < 350) change = 8;
             else change = 6;
             
             c.t += change; totalT += change;
             if (Math.floor(totalT/50) > Math.floor((totalT-change)/50)) coins += (totalT <= 250 ? 35 : 25);
-            document.getElementById('status').innerText = "+" + change + "🏆 ПОБЕДА!";
+            document.getElementById('status').innerText = "+" + change + "🏆";
         } else {
             change = (c.t < 100 ? 0 : 4);
             c.t = Math.max(0, c.t - change); totalT = Math.max(0, totalT - change);
-            document.getElementById('status').innerText = "-" + change + "🏆 СЛИВ";
+            document.getElementById('status').innerText = "-" + change + "🏆";
         }
         save();
         setTimeout(() => { update(); document.getElementById('arena').style.display = 'none'; }, 1500);
