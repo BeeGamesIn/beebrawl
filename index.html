@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Bee Brawl v1.6</title>
+    <title>v1.7 Max Rank and AMMO</title>
     <style>
-        :root { --gold: #f1c40f; --blue: #3498db; --red: #e74c3c; --green: #2ecc71; --bg: #121212; }
+        :root { --gold: #f1c40f; --blue: #3498db; --red: #e74c3c; --green: #2ecc71; --bg: #121212; --purple: #4a148c; }
         body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; touch-action: manipulation; }
 
         .header { display: flex; justify-content: space-around; padding: 15px 10px; background: #000; border-bottom: 2px solid #333; height: 50px; align-items: center; }
@@ -14,18 +14,19 @@
         .screen { display: none; height: calc(100vh - 120px); flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; box-sizing: border-box; width: 100%; }
         .active { display: flex; }
 
-        .rank-card { background: #1a1a1a; padding: 12px; border-radius: 15px; width: 90%; border: 1px solid #333; margin-bottom: 10px; }
-        .progress-bg { width: 100%; height: 10px; background: #333; border-radius: 5px; margin-top: 5px; overflow: hidden; }
+        .rank-card { background: #1a1a1a; padding: 12px; border-radius: 15px; width: 90%; border: 1px solid #333; margin-bottom: 10px; text-align: center; }
+        .rank-text { font-weight: 900; font-size: 18px; text-transform: uppercase; }
+        .max-1 { color: #f1c40f; text-shadow: 0 0 10px #f1c40f; }
+        .max-2 { color: #3498db; text-shadow: 0 0 10px #3498db; }
+        .max-3 { color: #ff4ed2; text-shadow: 0 0 15px #ff4ed2; animation: burn 1.5s infinite alternate; }
+        
+        @keyframes burn { from { opacity: 0.8; } to { opacity: 1; transform: scale(1.05); } }
+
+        .progress-bg { width: 100%; height: 10px; background: #333; border-radius: 5px; margin-top: 8px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--gold); width: 0%; transition: 0.5s; }
 
-        #main-sprite { font-size: 110px; margin: 5px 0; filter: drop-shadow(0 0 10px rgba(241,196,15,0.2)); }
-
-        .play-btn { 
-            background: var(--gold); border: none; width: 85%; max-width: 250px; 
-            padding: 15px; font-size: 24px; border-radius: 25px; 
-            box-shadow: 0 5px 0 #d35400; color: #000; font-weight: 900; 
-            margin-top: 10px; cursor: pointer;
-        }
+        #main-sprite { font-size: 110px; margin: 5px 0; }
+        .play-btn { background: var(--gold); border: none; width: 85%; max-width: 250px; padding: 15px; font-size: 24px; border-radius: 25px; box-shadow: 0 5px 0 #d35400; color: #000; font-weight: 900; margin-top: 10px; cursor: pointer; }
         .play-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #d35400; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; }
@@ -33,16 +34,19 @@
         .nav-item.active { color: var(--gold); }
         .nav-icon { font-size: 24px; }
 
-        .list-item { background: #1e1e1e; width: 100%; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        
         #arena { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1b5e20; z-index: 1000; display: none; }
-        #bear-container { position: absolute; width: 80px; text-align: center; transition: 0.6s ease-out; }
+        .bear-box { position: absolute; width: 80px; text-align: center; transition: 0.6s ease-out; }
         .hp-bar-bg { width: 60px; height: 6px; background: #000; border: 1px solid #fff; margin: 0 auto 5px auto; border-radius: 3px; overflow: hidden; }
-        #bear-hp-fill { width: 100%; height: 100%; background: var(--red); transition: 0.2s; }
-        #player { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); font-size: 60px; }
+        .hp-fill { width: 100%; height: 100%; background: var(--red); transition: 0.2s; }
+        
+        #player-wrap { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
+        .ammo-bg { width: 50px; height: 5px; background: rgba(0,0,0,0.5); border-radius: 2px; margin-bottom: 5px; border: 1px solid #fff; overflow: hidden;}
+        #ammo-fill { width: 100%; height: 100%; background: #00faff; transition: width 0.1s; }
+        #player { font-size: 60px; }
+
         .projectile { position: absolute; font-size: 24px; transition: 0.3s linear; pointer-events: none; }
         
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; padding-bottom: 20px; }
         .card { background: #1e1e1e; padding: 15px; border-radius: 12px; border: 2px solid transparent; text-align: center; }
         .card.selected { border-color: var(--gold); background: #252525; }
     </style>
@@ -56,26 +60,26 @@
 
     <div id="home-scr" class="screen active">
         <div class="rank-card">
-            <div style="display:flex; justify-content: space-between; font-weight: bold; font-size: 13px;">
-                <span id="cur-rank"> РАНГ 1 </span>
-                <span><span id="cur-t">0</span> / 25 🏆</span>
+            <div id="rank-label" class="rank-text">РАНГ 1</div>
+            <div style="font-size: 12px; margin-top: 5px; color: #aaa;">
+                <span id="cur-t">0</span> / 25 🏆
             </div>
             <div class="progress-bg"><div id="rank-fill" class="progress-fill"></div></div>
         </div>
         <div id="main-sprite">🐝</div>
         <button class="play-btn" onclick="startFight()">В БОЙ!</button>
-        <p style="color: #555; font-size: 11px; margin-top: 15px;">v1.6 Fix all</p>
+        <p style="color: #555; font-size: 11px; margin-top: 15px;">v1.7 New Max Rang & Brawlers</p>
     </div>
 
     <div id="hive-scr" class="screen">
-        <h2 style="margin-top:0">ТВОИ ПЧЕЛЫ</h2>
+        <h2 style="margin-top:0">УЛЕЙ</h2>
         <div class="grid" id="hive-grid"></div>
     </div>
 
     <div id="shop-scr" class="screen">
         <h2 style="margin-top:0">МАГАЗИН СИЛЫ</h2>
-        <div class="list-item">
-            <div><b>Урон пчелы</b><br><small>Бей сильнее</small></div>
+        <div class="list-item" style="background:#1e1e1e; padding:15px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; width:100%; box-sizing:border-box;">
+            <div><b>Урон отряда</b><br><small>Бей медведей сильнее</small></div>
             <button style="background:var(--green); border:none; color:white; padding:8px 15px; border-radius:8px; font-weight:bold;" onclick="buyUp()">150 🍯</button>
         </div>
     </div>
@@ -93,11 +97,18 @@
     </div>
 
     <div id="arena" onclick="shoot(event)">
-        <div id="bear-container">
-            <div class="hp-bar-bg"><div id="bear-hp-fill"></div></div>
+        <div id="bear1" class="bear-box">
+            <div class="hp-bar-bg"><div id="hp-fill1" class="hp-fill"></div></div>
             <div style="font-size:60px">🐻</div>
         </div>
-        <div id="player">🐝</div>
+        <div id="bear2" class="bear-box" style="display:none">
+            <div class="hp-bar-bg"><div id="hp-fill2" class="hp-fill"></div></div>
+            <div style="font-size:60px">🐻</div>
+        </div>
+        <div id="player-wrap">
+            <div class="ammo-bg"><div id="ammo-fill"></div></div>
+            <div id="player">🐝</div>
+        </div>
         <div style="position:absolute; top:40px; width:100%; text-align:center;">
             <h1 id="status" style="margin:0; text-shadow: 2px 2px #000;">БОЙ!</h1>
         </div>
@@ -106,13 +117,20 @@
 <script>
     const SAVE_KEY = 'BeeBrawl_FINAL_STABLE';
     let coins = 0, totalT = 0, sel = 'bee';
+    
     let chars = {
-        bee: { em: '🐝', t: 0, open: true, p: 0, proj: '📍' },
-        fly: { em: '🪰', t: 0, open: false, p: 250, proj: '🦠' },
-        spider: { em: '🕷️', t: 0, open: false, p: 500, proj: '🕸️' },
-        mosq: { em: '🦟', t: 0, open: false, p: 800, proj: '💉' }
+        bee: { em: '🐝', t: 0, open: true, p: 0, proj: '📍', rech: 2000 },
+        fly: { em: '🪰', t: 0, open: false, p: 250, proj: '🦠', rech: 2000 },
+        worm: { em: '🪱', t: 0, open: false, p: 400, proj: '🟤', rech: 1800 },
+        spider: { em: '🕷️', t: 0, open: false, p: 500, proj: '🕸️', rech: 1500 },
+        ladybug: { em: '🐞', t: 0, open: false, p: 600, proj: '⚫', rech: 1400 },
+        mosq: { em: '🦟', t: 0, open: false, p: 800, proj: '💉', rech: 1100 },
+        hopper: { em: '🦗', t: 0, open: false, p: 1200, proj: '🍃', rech: 900 }
     };
-    let bHP, bMove, isGameOver = true;
+
+    let bears = [ {hp: 60, active: false}, {hp: 60, active: false} ];
+    let bMove, isGameOver = true;
+    let ammo = 10, isReloading = false;
 
     function nav(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -121,15 +139,20 @@
         el.classList.add('active');
     }
 
-    function save() {
-        localStorage.setItem(SAVE_KEY, JSON.stringify({ coins, totalT, sel, chars }));
-    }
-
+    function save() { localStorage.setItem(SAVE_KEY, JSON.stringify({ coins, totalT, sel, chars })); }
+    
     function load() {
         const d = JSON.parse(localStorage.getItem(SAVE_KEY));
-        if (d) {
-            coins = d.coins || 0; totalT = d.totalT || 0; sel = d.sel || 'bee';
-            chars = d.chars || chars;
+        if (d) { 
+            coins = d.coins || 0; 
+            totalT = d.totalT || 0; 
+            sel = d.sel || 'bee'; 
+            for(let key in d.chars) {
+                if(chars[key]) {
+                    chars[key].t = d.chars[key].t;
+                    chars[key].open = d.chars[key].open;
+                }
+            }
         }
         update();
     }
@@ -139,7 +162,16 @@
         document.getElementById('total-t').innerText = Math.floor(totalT);
         document.getElementById('coins').innerText = Math.floor(coins);
         document.getElementById('main-sprite').innerText = c.em;
-        document.getElementById('cur-rank').innerText = "РАНГ " + (Math.floor(c.t/25)+1);
+        
+        const rank = Math.floor(c.t/25)+1;
+        const label = document.getElementById('rank-label');
+        label.className = "rank-text";
+
+        if (rank >= 300) { label.innerText = "3 MAX РАНГ"; label.classList.add('max-3'); }
+        else if (rank >= 200) { label.innerText = "2 MAX РАНГ"; label.classList.add('max-2'); }
+        else if (rank >= 100) { label.innerText = "1 MAX РАНГ"; label.classList.add('max-1'); }
+        else { label.innerText = "РАНГ " + rank; }
+
         document.getElementById('cur-t').innerText = Math.floor(c.t%25);
         document.getElementById('rank-fill').style.width = (c.t%25/25*100) + "%";
         renderHive(); renderAchs();
@@ -157,10 +189,10 @@
 
     function renderAchs() {
         const l = document.getElementById('ach-list'); l.innerHTML = '';
-        const list = [{n:'Новичок', g:50}, {n:'Боец', g:150}, {n:'Легенда', g:500}];
+        const list = [{n:'Новичок', g:50}, {n:'Боец', g:150}, {n:'Легенда', g:500}, {n:'ЛУЧШИЙ В УЛЬЕ', g:7500}];
         list.forEach(a => {
             const ok = totalT >= a.g;
-            l.innerHTML += `<div class="list-item"><div><b>${a.n}</b><br><small>${a.g} 🏆</small></div><span style="color:${ok? 'var(--green)':'#555'}">${ok?'ГОТОВО':'В ПРОЦЕССЕ'}</span></div>`;
+            l.innerHTML += `<div class="list-item" style="background:#1e1e1e; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; width:100%; box-sizing:border-box;"><div style="text-align:left"><b>${a.n}</b><br><small>${a.g} 🏆</small></div><span style="color:${ok? 'var(--green)':'#555'}">${ok?'ГОТОВО':'В ПРОЦЕССЕ'}</span></div>`;
         });
     }
 
@@ -169,79 +201,114 @@
     function buyUp() { if(coins>=150){ coins-=150; save(); update(); } }
 
     function startFight() {
-        isGameOver = false; // Бой начался
-        bHP = 60; 
-        document.getElementById('bear-hp-fill').style.width = '100%';
-        document.getElementById('player').innerText = chars[sel].em;
-        document.getElementById('status').innerText = "БЕЙ НА ИВЕНТЕ!";
+        isGameOver = false;
+        ammo = 10; isReloading = false;
+        document.getElementById('ammo-fill').style.width = '100%';
+        document.getElementById('ammo-fill').style.background = '#00faff';
+
+        const c = chars[sel];
+        const rank = Math.floor(c.t/25)+1;
+        const arena = document.getElementById('arena');
+        arena.style.background = rank >= 300 ? 'var(--purple)' : '#1b5e20';
+
+        bears[0].hp = 60; bears[0].active = true;
+        document.getElementById('bear1').style.display = 'block';
+        document.getElementById('hp-fill1').style.width = '100%';
+
+        if(rank >= 100) {
+            bears[1].hp = 60; bears[1].active = true;
+            document.getElementById('bear2').style.display = 'block';
+            document.getElementById('hp-fill2').style.width = '100%';
+        } else {
+            bears[1].active = false;
+            document.getElementById('bear2').style.display = 'none';
+        }
+
+        document.getElementById('player').innerText = c.em;
+        document.getElementById('status').innerText = rank >= 300 ? "ФИНАЛЬНАЯ БИТВА!" : (rank >= 100 ? "MAX БИТВА!" : "БОЙ!");
         document.getElementById('arena').style.display = 'block';
-        moveBear();
+        moveBears();
         if (bMove) clearInterval(bMove);
-        bMove = setInterval(moveBear, 1400);
+        bMove = setInterval(moveBears, 1400);
     }
 
-    function moveBear() {
-        const bc = document.getElementById('bear-container');
-        bc.style.left = Math.random()*70 + '%';
-        bc.style.top = (Math.random()*40 + 15) + '%';
+    function moveBears() {
+        [1,2].forEach(num => {
+            const b = document.getElementById('bear' + num);
+            if(bears[num-1].active) {
+                b.style.left = Math.random()*70 + '%';
+                b.style.top = (Math.random()*40 + 15) + '%';
+            }
+        });
     }
 
     function shoot(e) {
-        if(isGameOver) return; // Если бой окончен, стрелять нельзя
-        if(e.target.id == 'arena') {
+        if(isGameOver || isReloading) return;
+        
+        if(e.target.id == 'arena' || e.target.id == 'player' || e.target.id == 'player-wrap') {
+            ammo--;
+            document.getElementById('ammo-fill').style.width = (ammo/10*100) + '%';
+
             const p = document.createElement('div');
             p.className = 'projectile'; p.innerText = chars[sel].proj;
-            p.style.left = '50%'; p.style.bottom = '90px';
+            p.style.left = '50%'; p.style.bottom = '110px';
             document.getElementById('arena').appendChild(p);
+
             setTimeout(() => {
                 p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
                 setTimeout(() => {
-                    const br = document.getElementById('bear-container').getBoundingClientRect();
-                    if(Math.abs(e.clientX - (br.left+40)) < 60 && Math.abs(e.clientY - (br.top+40)) < 60) {
-                        bHP -= 20;
-                        document.getElementById('bear-hp-fill').style.width = (bHP/60*100) + '%';
-                        if(bHP <= 0 && !isGameOver) end(true);
-                    }
+                    [1,2].forEach(num => {
+                        if(!bears[num-1].active) return;
+                        const br = document.getElementById('bear' + num).getBoundingClientRect();
+                        if(Math.abs(e.clientX - (br.left+40)) < 60 && Math.abs(e.clientY - (br.top+40)) < 60) {
+                            bears[num-1].hp -= 20;
+                            document.getElementById('hp-fill' + num).style.width = (bears[num-1].hp/60*100) + '%';
+                            if(bears[num-1].hp <= 0) {
+                                bears[num-1].active = false;
+                                document.getElementById('bear' + num).style.display = 'none';
+                            }
+                        }
+                    });
+                    if(!bears[0].active && !bears[1].active) end(true);
                     p.remove();
                 }, 300);
             }, 10);
+
+            if(ammo <= 0) {
+                isReloading = true;
+                document.getElementById('ammo-fill').style.background = 'var(--red)';
+                setTimeout(() => {
+                    ammo = 10;
+                    isReloading = false;
+                    document.getElementById('ammo-fill').style.width = '100%';
+                    document.getElementById('ammo-fill').style.background = '#00faff';
+                }, chars[sel].rech);
+            }
         }
     }
 
     function end(win) {
-        if(isGameOver) return; // Защита: срабатывает только 1 раз
+        if(isGameOver) return;
         isGameOver = true;
         clearInterval(bMove);
-        
         const c = chars[sel];
         let change = 0;
         
         if(win) {
-            // ТВОЯ ФОРМУЛА
             if (c.t < 100) change = 10;
             else if (c.t < 350) change = 8;
-            else change = 11;
-            
+            else change = 6;
             c.t += change; totalT += change;
-            // Мед за каждые 50 кубков
-            if (Math.floor(totalT/50) > Math.floor((totalT-change)/50)) {
-                coins += (totalT <= 250 ? 35 : 25);
-            }
+            if (Math.floor(totalT/50) > Math.floor((totalT-change)/50)) coins += (totalT <= 250 ? 35 : 25);
             document.getElementById('status').innerText = "+" + change + "🏆";
         } else {
             change = (c.t < 100 ? 0 : 4);
-            c.t = Math.max(0, c.t - change); 
-            totalT = Math.max(0, totalT - change);
+            c.t = Math.max(0, c.t - change); totalT = Math.max(0, totalT - change);
             document.getElementById('status').innerText = "-" + change + "🏆";
         }
-        
         save();
-        setTimeout(() => { 
-            update(); 
-            document.getElementById('arena').style.display = 'none'; 
-        }, 1500);
+        setTimeout(() => { update(); document.getElementById('arena').style.display = 'none'; }, 1500);
     }
-
     window.onload = load;
 </script>
 </body>
