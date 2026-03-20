@@ -173,7 +173,7 @@
         bHP = 60; 
         document.getElementById('bear-hp-fill').style.width = '100%';
         document.getElementById('player').innerText = chars[sel].em;
-        document.getElementById('status').innerText = "БЕЙ!";
+        document.getElementById('status').innerText = "БЕЙ НА ИВЕНТЕ!";
         document.getElementById('arena').style.display = 'block';
         moveBear();
         if (bMove) clearInterval(bMove);
@@ -220,7 +220,7 @@
             // ТВОЯ ФОРМУЛА
             if (c.t < 100) change = 10;
             else if (c.t < 350) change = 8;
-            else change = 9;
+            else change = 11;
             
             c.t += change; totalT += change;
             // Мед за каждые 50 кубков
